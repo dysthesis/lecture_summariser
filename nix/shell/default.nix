@@ -29,7 +29,9 @@ in
         with p; [
           (openai-whisper.override {
             triton = null;
-            })
+          })
+          pymupdf
+          ollama
         ]))
     ];
     PYTORCH_ROCM_ARCH = "gfx1030";
