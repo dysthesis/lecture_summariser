@@ -1,9 +1,11 @@
 from pathlib import Path
 import sys
-from ollama import ChatResponse, chat
 import audio_extractor, transcribe, pdf_extract
+from google import genai
+from google.genai import types
 
 def main():
+    client = genai.Client()
     video = Path(sys.argv[1])
     audio = audio_extractor.extract_audio(video, None)
     transcript = transcribe.transcribe(audio)
@@ -46,29 +48,20 @@ def main():
     {prompt}
     """)
 
-    response: ChatResponse = chat(
-        model = "hf.co/unsloth/DeepSeek-R1-0528-Qwen3-8B-GGUF:Q4_K_XL",
-        # model = "qwen3",
-        messages = [
-            {
-                'role': 'system',
-                'content': system_prompt,
-            },
-            {
-                'role': 'user',
-                'content': prompt,
-            }
-        ],
-        options = {
-            "num_ctx": 6144,
-            "num_predict": -1,
-            "temperature": 0.2,
-            "top_p": 0.9,
-            "stream": False
-        }
+    response = client.models.generate_content_stream(
+        model="gemini-2.5-pro",
+        config=types.GenerateContentConfig(
+            thinking_config=types.ThinkingConfig(thinking_budget=1024),
+            system_instruction=system_prompt
+        ),
+        contents=prompt
     )
 
-    print(response.message.content)
+    print("Getting responses...")
+
+    for chunk in response:
+        print(chunk.text, end="")
+
 
 if __name__ == "__main__":
         main()

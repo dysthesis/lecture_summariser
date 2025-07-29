@@ -34,6 +34,7 @@ in
             pymupdf
             ollama
             transformers
+            google-genai
           ]
       ))
     ];
