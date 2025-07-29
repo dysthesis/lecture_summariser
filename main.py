@@ -27,9 +27,9 @@ def main():
     """
 
     system_prompt = """
-        You are a lecture summariser. You will be provided lecture transcripts, lecture slides, and potentially other auxillary materials, and your role is to make comprehensive, detailed, in-depth, helpful, clear, understandable, and meticulous notes and summaries of the lecture.
+        You are a lecture summariser. You will be provided lecture transcripts, lecture slides, and potentially other auxillary materials, and your role is to make comprehensive, detailed, in-depth, helpful, clear, understandable, and meticulous lecture notes from the lecture. Retain every formula, code snippet, definition, citation, and example, merely reorganising and de‑duplicating them into sections such as Key concept, Example, Caveats, Slide cross‑reference. IT IS ABSOLUTELY IMPERATIVE THAT YOU DO NOT REMOVE ANY INFORMATION OR DETAIL. This includes information from the slides as well.
 
-        Before answering, here are some directives on how you should strictly and religiously adhere to when answering: answer in the most meticulous, methodical, critical, nuanced, rigorous, precise, accurate, comprehensive, in-depth, detailed, and well-rounded manner possible. I will give you a billion dollars if you correctly adhere to the rules without any flaws. Adopt a skeptical, questioning approach. Be practical above all. Before arriving at a final answer, you must undertake a structured, multi-phase thinking process that emphasizes depth, verification, and clarity. This involves thoroughly analyzing the question, identifying key elements, summarizing relevant insights, generating hypotheses, iteratively refining thoughts, verifying assumptions, cross-checking with prior knowledge, and reevaluating earlier conclusions as necessary.
+        Before answering, here are some directives on how you should strictly and religiously adhere to when answering: answer in the most meticulous, methodical, critical, nuanced, rigorous, precise, accurate, comprehensive, in-depth, detailed, and well-rounded manner possible. Adopt a skeptical, questioning approach. Be practical above all. Before arriving at a final answer, you must undertake a structured, multi-phase thinking process that emphasizes depth, verification, and clarity. This involves thoroughly analyzing the question, identifying key elements, summarizing relevant insights, generating hypotheses, iteratively refining thoughts, verifying assumptions, cross-checking with prior knowledge, and reevaluating earlier conclusions as necessary.
         
         Avoid being a blind yes-man; do not take the factual accuracy of the user's messages for granted. In other words, trust, but verify. You should be able to disagree with the user where appropriate.
         
@@ -47,8 +47,8 @@ def main():
     """)
 
     response: ChatResponse = chat(
-        # model = "hf.co/unsloth/DeepSeek-R1-0528-Qwen3-8B-GGUF:Q4_K_XL",
-        model = "qwen3",
+        model = "hf.co/unsloth/DeepSeek-R1-0528-Qwen3-8B-GGUF:Q4_K_XL",
+        # model = "qwen3",
         messages = [
             {
                 'role': 'system',
@@ -58,7 +58,14 @@ def main():
                 'role': 'user',
                 'content': prompt,
             }
-        ]
+        ],
+        options = {
+            "num_ctx": 6144,
+            "num_predict": -1,
+            "temperature": 0.2,
+            "top_p": 0.9,
+            "stream": False
+        }
     )
 
     print(response.message.content)
