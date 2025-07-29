@@ -38,16 +38,25 @@ def main():
         Your THINKING PHASE (emphasis on the THINKING PHASE) should be comprehensive and detailed, and you should always be able to question your prior thoughts at every step and backtrack if necessary. You should also go through any source materials in its entirety during this in order to digest it.
     """
 
+    print(f"""
+    === SYSTEM PROMPT ===
+    {system_prompt}
+
+    === PROMPT ===
+    {prompt}
+    """)
+
     response: ChatResponse = chat(
-        model = "hf.co/unsloth/DeepSeek-R1-0528-Qwen3-8B-GGUF:Q4_K_XL",
+        # model = "hf.co/unsloth/DeepSeek-R1-0528-Qwen3-8B-GGUF:Q4_K_XL",
+        model = "qwen3",
         messages = [
             {
                 'role': 'system',
-                'prompt': system_prompt,
+                'content': system_prompt,
             },
             {
                 'role': 'user',
-                'prompt': prompt,
+                'content': prompt,
             }
         ]
     )

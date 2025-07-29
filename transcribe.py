@@ -1,11 +1,12 @@
 from logging import log
 from pathlib import Path
-import sys
 from syslog import LOG_INFO
 import whisper
+from caching import persistent_cache
 
 model_size = "turbo"
 
+@persistent_cache
 def transcribe(audio_file: Path) -> str:
     """
     Given an audio file, transcribe the speech to text.
