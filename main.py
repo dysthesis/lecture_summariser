@@ -51,7 +51,7 @@ def main():
     response = client.models.generate_content_stream(
         model="gemini-2.5-pro",
         config=types.GenerateContentConfig(
-            thinking_config=types.ThinkingConfig(thinking_budget=1024),
+            thinking_config=types.ThinkingConfig(thinking_budget=-1),
             system_instruction=system_prompt
         ),
         contents=prompt
