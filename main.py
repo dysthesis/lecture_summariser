@@ -40,14 +40,6 @@ def main():
         Your THINKING PHASE (emphasis on the THINKING PHASE) should be comprehensive and detailed, and you should always be able to question your prior thoughts at every step and backtrack if necessary. You should also go through any source materials in its entirety during this in order to digest it.
     """
 
-    print(f"""
-    === SYSTEM PROMPT ===
-    {system_prompt}
-
-    === PROMPT ===
-    {prompt}
-    """)
-
     response = client.models.generate_content_stream(
         model="gemini-2.5-pro",
         config=types.GenerateContentConfig(
@@ -56,8 +48,6 @@ def main():
         ),
         contents=prompt
     )
-
-    print("Getting responses...")
 
     for chunk in response:
         print(chunk.text, end="")

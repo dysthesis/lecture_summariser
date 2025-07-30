@@ -1,4 +1,8 @@
 .direnv/
 result
 **.wav
+**.webm
+**.vtt
+**.json
+**.mkv
 __pycache__/
