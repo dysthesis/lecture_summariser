@@ -3,33 +3,33 @@ import sys
 import audio_extractor, transcribe, pdf_extract
 from google import genai
 from google.genai import types
+import sys
+import magic
 
 def main():
     client = genai.Client()
-    video = Path(sys.argv[1])
-    audio = audio_extractor.extract_audio(video, None)
-    transcript = transcribe.transcribe(audio)
-    slides_transcript = pdf_extract.extract_text(Path(sys.argv[2])) 
+    isVideo = lambda file: magic.from_file(file, mime=True).startswith('video/')
+    isPdf = lambda file: magic.from_file(file, mime=True) == 'application/pdf'
+
+    videos = list(filter(isVideo, map(Path, sys.argv)))
+    slides = list(filter(isPdf, map(Path, sys.argv)))
+
+    audios = [audio_extractor.extract_audio(video, Path("./test/COMP2041/work")) for video in videos]
+    transcript = "\n".join([transcribe.transcribe(audio) for audio in audios])
+    slides_transcript = "\n".join([pdf_extract.extract_text(slide) for slide in slides])
+
     prompt = f"""
       Given the following source materials for a lecture, please create a comprehensive and detailed lecture note
 
+      Lecture transcript:
+          {transcript}
+
       Slides:
           {slides_transcript}
-
-      Transcript (made by Whisper):
-          {transcript}
-    """
-
-    source_transcript = open(sys.argv[3], "r") if len(sys.argv) >= 4 else None
-
-    if source_transcript is not None:
-        prompt += f""""
-            Transcript (platform-made):
-                {source_transcript}
     """
 
     system_prompt = """
-        You are a lecture summariser. You will be provided lecture transcripts, lecture slides, and potentially other auxillary materials, and your role is to make comprehensive, detailed, in-depth, helpful, clear, understandable, and meticulous lecture notes from the lecture. Retain every formula, code snippet, definition, citation, and example, merely reorganising and de‑duplicating them into sections such as Key concept, Example, Caveats, Slide cross‑reference. IT IS ABSOLUTELY IMPERATIVE THAT YOU DO NOT REMOVE ANY INFORMATION OR DETAIL. This includes information from the slides as well.
+        You are a lecture summariser. You will be provided lecture transcripts, lecture slides, and potentially other auxillary materials, and your role is to make comprehensive, detailed, in-depth, helpful, clear, understandable, and meticulous lecture notes from the lecture. Retain every formula, code snippet, definition, citation, and example, merely reorganising and de‑duplicating them into sections such as Key concept, Example, Caveats, Slide cross‑reference. IT IS ABSOLUTELY IMPERATIVE THAT YOU DO NOT REMOVE ANY INFORMATION OR DETAIL FROM THE LECTURE TRANSCRIPT. However, you should only mention contents of the slides when it is also mentioned in or otherwise relevant to the contents of the lecture transcript.
 
         Before answering, here are some directives on how you should strictly and religiously adhere to when answering: answer in the most meticulous, methodical, critical, nuanced, rigorous, precise, accurate, comprehensive, in-depth, detailed, and well-rounded manner possible. Adopt a skeptical, questioning approach. Be practical above all. Before arriving at a final answer, you must undertake a structured, multi-phase thinking process that emphasizes depth, verification, and clarity. This involves thoroughly analyzing the question, identifying key elements, summarizing relevant insights, generating hypotheses, iteratively refining thoughts, verifying assumptions, cross-checking with prior knowledge, and reevaluating earlier conclusions as necessary.
         
@@ -43,7 +43,7 @@ def main():
     response = client.models.generate_content_stream(
         model="gemini-2.5-pro",
         config=types.GenerateContentConfig(
-            thinking_config=types.ThinkingConfig(thinking_budget=-1),
+            thinking_config=types.ThinkingConfig(thinking_budget=32768),
             system_instruction=system_prompt
         ),
         contents=prompt

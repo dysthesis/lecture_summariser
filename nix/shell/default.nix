@@ -35,6 +35,7 @@ in
             ollama
             transformers
             google-genai
+            python-magic
           ]
       ))
     ];
